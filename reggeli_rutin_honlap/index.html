@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#8fc63d">
+<title>Reggeli rutin – képes kártyák</title>
+<style>
+:root{--green:#8fc63d;--green-dark:#4e781d;--ink:#24301d;--cream:#f8fbf2;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+header{text-align:center;padding:28px 16px 18px;background:linear-gradient(135deg,#eff8df,#fff)}
+h1{margin:0;font-size:clamp(1.7rem,4vw,2.5rem);color:#416b1b}
+header p{margin:8px auto 0;max-width:600px;font-size:1.05rem}
+main{max-width:1050px;margin:auto;padding:20px 16px 50px}
+.hint{text-align:center;margin:0 0 18px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.term{border:2px solid #d9e9c2;background:#fff;border-radius:18px;min-height:76px;padding:16px 10px;font-size:1.08rem;font-weight:700;color:#365b18;cursor:pointer;box-shadow:0 3px 0 #e7efdc;transition:transform .12s,border-color .12s,background .12s}
+.term:hover,.term:focus-visible{border-color:var(--green);background:#f4fae9;transform:translateY(-2px);outline:3px solid #d4ecb0;outline-offset:1px}
+.term[aria-pressed="true"]{background:var(--green);color:#18240e;border-color:var(--green-dark)}
+.viewer{display:none;margin:24px auto 0;max-width:560px;text-align:center;background:#fff;border:3px solid var(--green);border-radius:24px;padding:14px;box-shadow:0 8px 24px #263a1515}
+.viewer.open{display:block}
+.viewer h2{font-size:clamp(1.5rem,4vw,2rem);margin:4px 0 12px}
+.viewer img{display:block;width:100%;max-height:62vh;object-fit:contain;margin:auto;border-radius:12px}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.controls button{border:0;border-radius:12px;background:#eaf4dc;padding:12px 18px;font-size:1rem;font-weight:700;cursor:pointer}
+.controls button:disabled{opacity:.4;cursor:not-allowed}
+footer{text-align:center;color:#66745a;font-size:.9rem;padding:0 16px 24px}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.term{min-height:84px}}
+</style>
+</head>
+<body>
+<header><h1>☀️ Reggeli rutin</h1><p>Koppints egy kifejezésre, és nézd meg a hozzá tartozó képet!</p></header>
+<main>
+<p class="hint">Mit csinálunk reggel?</p>
+<section class="grid" id="terms" aria-label="Reggeli tevékenységek"></section>
+<section class="viewer" id="viewer" aria-live="polite" aria-label="Kiválasztott képes kártya">
+<h2 id="selectedTitle"></h2><img id="selectedImage" alt="">
+<div class="controls"><button id="prev" type="button">← Előző</button><button id="next" type="button">Következő →</button></div>
+</section>
+</main>
+<footer>A képek a feltöltött „Reggeli rutin” PDF kártyáiból készültek.</footer>
+<script>
+const cards = [{"term": "Ébresztő", "image": "kepek/kartya_01.jpg"}, {"term": "Vécé", "image": "kepek/kartya_02.jpg"}, {"term": "Bili", "image": "kepek/kartya_03.jpg"}, {"term": "Arcmosás", "image": "kepek/kartya_04.jpg"}, {"term": "Fogmosás", "image": "kepek/kartya_05.jpg"}, {"term": "Fésülködés", "image": "kepek/kartya_06.jpg"}, {"term": "Öltözködés", "image": "kepek/kartya_07.jpg"}, {"term": "Reggeli", "image": "kepek/kartya_08.jpg"}, {"term": "Iskolatáska", "image": "kepek/kartya_09.jpg"}, {"term": "Vitaminok", "image": "kepek/kartya_10.jpg"}, {"term": "Meleg ruha", "image": "kepek/kartya_11.jpg"}, {"term": "Elindulunk", "image": "kepek/kartya_12.jpg"}];
+const grid = document.getElementById('terms');
+const viewer = document.getElementById('viewer');
+const title = document.getElementById('selectedTitle');
+const image = document.getElementById('selectedImage');
+let selected = -1;
+function showCard(index){
+  selected = (index + cards.length) % cards.length;
+  const card = cards[selected];
+  title.textContent = card.term;
+  image.src = card.image;
+  image.alt = card.term + ' képes kártya';
+  viewer.classList.add('open');
+  [...grid.children].forEach((button,i)=>button.setAttribute('aria-pressed', String(i===selected)));
+  document.getElementById('prev').disabled = selected===0;
+  document.getElementById('next').disabled = selected===cards.length-1;
+  viewer.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+cards.forEach((card,index)=>{
+  const button=document.createElement('button');
+  button.type='button'; button.className='term'; button.textContent=card.term;
+  button.setAttribute('aria-pressed','false');
+  button.addEventListener('click',()=>showCard(index));
+  grid.appendChild(button);
+});
+document.getElementById('prev').addEventListener('click',()=>{if(selected>0)showCard(selected-1)});
+document.getElementById('next').addEventListener('click',()=>{if(selected<cards.length-1)showCard(selected+1)});
+</script>
+</body>
+</html>
